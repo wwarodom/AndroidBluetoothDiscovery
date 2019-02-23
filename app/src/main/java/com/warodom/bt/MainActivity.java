@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,8 +25,13 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button     btnDiscovery ;
+    Button btnDiscovery ;
+    Button btnStop;
+    Button btnStatus;
+    Button btnExit;
     TextView  txtView;
+    BluetoothAdapter mBtAdapter;
+    boolean stop =  false;
 
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -37,11 +43,27 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
+                int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
                 System.out.println("Device name: " + deviceName);
                 System.out.println("Device MAC Addr: " + deviceHardwareAddress);
-                txtView.setText(txtView.getText() + "\n" + deviceName + " : " + deviceHardwareAddress);
-                Toast.makeText(getApplicationContext(), deviceName + " : " + deviceHardwareAddress , Toast.LENGTH_SHORT).show();
+                txtView.setText(txtView.getText() + "\n" + deviceName + " : " + deviceHardwareAddress + "  RSSI: " + rssi);
+//                Toast.makeText(getApplicationContext(),
+//                        deviceName + " : " + deviceHardwareAddress + "  RSSI: " + rssi , Toast.LENGTH_SHORT).show();
             }
+
+            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                // When discovery is finished , start discovery again
+                if (!stop) {
+                    mBtAdapter.startDiscovery();
+                    Toast.makeText(getApplicationContext(), "Restart discovery" , Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    mBtAdapter.cancelDiscovery();
+                    Toast.makeText(getApplicationContext(), "Stop discovery" , Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
         }
     };
 
@@ -50,15 +72,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnDiscovery = findViewById(R.id.btnDiscovery);
+        btnStatus = findViewById(R.id.btnStatus);
+        btnStop = findViewById(R.id.btnStop);
+        btnExit = findViewById(R.id.btnExit);
         txtView = findViewById(R.id.txtView);
 
+        txtView.setMovementMethod(new ScrollingMovementMethod());
 
-
-        final BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
         }
-
 
         int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
         ActivityCompat.requestPermissions(this,
@@ -105,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
                 registerReceiver(receiver, filter);
                 mBtAdapter.startDiscovery();
+                stop = false;
 
 //                Intent discoverableIntent =
 //                        new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -112,6 +137,35 @@ public class MainActivity extends AppCompatActivity {
 //                startActivity(discoverableIntent);
             }
         });
+
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mBtAdapter.isDiscovering())
+                    mBtAdapter.cancelDiscovery();
+                Toast.makeText(getApplicationContext(),"Stop discovery", Toast.LENGTH_SHORT).show();
+                txtView.setText("");
+                stop = true;
+            }
+        });
+
+        btnStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mBtAdapter.isDiscovering())
+                    Toast.makeText(getApplicationContext(),"Discovering...", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getApplicationContext(),"Stop discovery...", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
     }
 
     @Override

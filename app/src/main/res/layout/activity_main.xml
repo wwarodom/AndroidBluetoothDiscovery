@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/txtView"
-        android:text="List of nearby devices: "
+        android:scrollbars = "vertical"
+        android:text="@string/list_of_nearby_devices"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -20,6 +21,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnDiscovery"
-        android:text="Discovery"/>
+        android:text="@string/discovery"/>
+
+   <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       app:layout_constraintLeft_toRightOf="@id/btnDiscovery"
+        android:id="@+id/btnStatus"
+        android:text="@string/status"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       app:layout_constraintLeft_toRightOf="@id/btnStatus"
+        android:id="@+id/btnStop"
+        android:text="@string/stop"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       app:layout_constraintLeft_toRightOf="@id/btnStop"
+        android:id="@+id/btnExit"
+        android:text="@string/exit"/>
 
 </android.support.constraint.ConstraintLayout>
